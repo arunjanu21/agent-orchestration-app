@@ -1,0 +1,79 @@
+<div class="chat-container">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-left">
+      <span class="logo">🛍️</span>
+      <div>
+        <h1>ShopEasy Support</h1>
+        <span class="status-dot"></span>
+        <span class="status-text">AI Agents Online</span>
+      </div>
+    </div>
+    <button class="clear-btn" (click)="chatService.clearChat()">Clear</button>
+  </div>
+
+  <!-- Orchestrator status bar -->
+  @if (chatService.orchestratorStatus()) {
+    <div class="orchestrator-bar">
+      🧠 {{ chatService.orchestratorStatus() }}
+    </div>
+  }
+
+  <!-- Active agents pill bar -->
+  @if (chatService.activeAgents().length > 0) {
+    <div class="active-agents-bar">
+      @for (agent of chatService.activeAgents(); track agent) {
+        <span class="agent-pill">⚡ {{ agent }}</span>
+      }
+    </div>
+  }
+
+  <!-- Messages area -->
+  <div class="messages-area">
+
+    <!-- Welcome screen -->
+    @if (!chatService.hasMessages()) {
+      <div class="welcome">
+        <div class="welcome-icon">🤖</div>
+        <h2>How can our AI agents help you?</h2>
+        <p>Ask me about orders, discounts, returns or products</p>
+        <div class="quick-prompts">
+          @for (prompt of quickPrompts; track prompt) {
+            <button class="prompt-chip" (click)="sendMessage(prompt)">
+              {{ prompt }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Message list -->
+    @for (message of chatService.messages(); track message.id) {
+      <app-message [msg]="message" />
+    }
+
+    <!-- Auto-scroll anchor -->
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- Input area -->
+  <div class="input-area">
+    <textarea
+      class="input-box"
+      [value]="inputText()"
+      (input)="inputText.set($any($event.target).value)"
+      (keydown)="onKeyDown($event)"
+      placeholder="Ask about your orders, discounts, or products..."
+      rows="1"
+      [disabled]="chatService.isLoading()"
+    ></textarea>
+    <button
+      class="send-btn"
+      (click)="sendMessage()"
+      [disabled]="chatService.isLoading() || !inputText().trim()">
+      @if (chatService.isLoading()) { ⏳ } @else { ➤ }
+    </button>
+  </div>
+
+</div>
